@@ -1,12 +1,13 @@
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 
 import {
   getCurrentWeather,
   getForecast,
   getCurrentWeatherByCoordinates,
   getForecastByCoordinates,
-  getLocationFromPincode
+  getLocationFromPincode,
+  getCitySuggestions
 } from './services/weatherService'
 
 import WeatherMap from './components/WeatherMap'
@@ -28,9 +29,20 @@ function App() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
-  // Search weather using city, PIN code or coordinates
+  // Autocomplete states
+  const [suggestions, setSuggestions] = useState([])
+  const [suggestionsLoading, setSuggestionsLoading] = useState(false)
+
+  // Prevent autocomplete from reopening after selecting a city
+  const skipNextSuggestionSearch = useRef(false)
+
+  // --------------------------------
+  // 1. Search weather using city, PIN code or coordinates
+  // --------------------------------
   const handleSearch = async (e) => {
     e.preventDefault()
+
+    setSuggestions([])
 
     const searchValue = city.trim()
 
@@ -140,7 +152,9 @@ function App() {
     }
   }
 
-  // Detect current location and fetch its weather
+  // --------------------------------
+  // 2. Detect current location and fetch its weather
+  // --------------------------------
   const handleUseCurrentLocation = () => {
     if (!navigator.geolocation) {
       setError('Geolocation is not supported by your browser.')
@@ -215,16 +229,136 @@ function App() {
     )
   }
 
-  // Automatically detect location when the page opens
+  // --------------------------------
+  // 3. Automatically detect location when page opens
+  // --------------------------------
   useEffect(() => {
     handleUseCurrentLocation()
   }, [])
 
-  // Detect actual weather condition from API
+  // --------------------------------
+  // 4. Get city suggestions while typing
+  // --------------------------------
+  useEffect(() => {
+    const searchValue = city.trim()
+
+    // Skip the suggestion search after selecting a city
+    if (skipNextSuggestionSearch.current) {
+      skipNextSuggestionSearch.current = false
+      return
+    }
+
+    // Check whether input contains coordinates
+    const isCoordinates =
+      /^(-?\d+(?:\.\d+)?)\s*,\s*(-?\d+(?:\.\d+)?)$/.test(searchValue)
+
+    // Don't show suggestions for short input, PIN codes or coordinates
+    if (
+      searchValue.length < 2 ||
+      /^\d{6}$/.test(searchValue) ||
+      isCoordinates
+    ) {
+      setSuggestions([])
+      setSuggestionsLoading(false)
+      return
+    }
+
+    let ignore = false
+
+    // Wait before sending the API request
+    const timer = setTimeout(async () => {
+      try {
+        setSuggestionsLoading(true)
+
+        const results = await getCitySuggestions(searchValue)
+
+        if (!ignore) {
+          setSuggestions(results)
+        }
+
+      } catch (err) {
+        if (!ignore) {
+          console.error('City suggestions error:', err)
+          setSuggestions([])
+        }
+
+      } finally {
+        if (!ignore) {
+          setSuggestionsLoading(false)
+        }
+      }
+    }, 350)
+
+    // Cancel previous search when the user types again
+    return () => {
+      ignore = true
+      clearTimeout(timer)
+    }
+  }, [city])
+
+  // --------------------------------
+  // 5. Load weather when a suggestion is selected
+  // --------------------------------
+  const handleSelectSuggestion = async (suggestion) => {
+    skipNextSuggestionSearch.current = true
+
+    const countryName =
+      suggestion.country === 'IN'
+        ? 'India'
+        : suggestion.country
+
+    setCity(
+      `${suggestion.name}${suggestion.state ? ', ' + suggestion.state : ''}, ${countryName}`
+    )
+
+    setSuggestions([])
+    setSuggestionsLoading(false)
+    setError('')
+    setLocationInfo(null)
+    setLoading(true)
+
+    try {
+      const results = await Promise.all([
+        getCurrentWeatherByCoordinates(
+          suggestion.lat,
+          suggestion.lon
+        ),
+        getForecastByCoordinates(
+          suggestion.lat,
+          suggestion.lon
+        )
+      ])
+
+      setWeather(results[0])
+      setForecast(results[1])
+
+    } catch (err) {
+      console.error('Selected city weather error:', err)
+
+      if (err.response?.status === 401) {
+        setError('Weather API key is invalid or not activated.')
+      } else if (err.response?.status === 404) {
+        setError('Weather information could not be found.')
+      } else {
+        setError(
+          'Could not load weather for this location. Please try again.'
+        )
+      }
+
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // --------------------------------
+  // 6. Detect actual weather condition from API
+  // --------------------------------
   const weatherCondition =
     weather?.weather?.[0]?.main?.toLowerCase() || 'default'
 
-  // Current date
+  // --------------------------------
+  // 7. Current date
+  // --------------------------------
   const currentDate = new Date().toLocaleDateString('en-IN', {
     weekday: 'long',
     month: 'long',
@@ -232,6 +366,9 @@ function App() {
     year: 'numeric'
   })
 
+  // --------------------------------
+  // 8. UI
+  // --------------------------------
   return (
     <div className={`dashboard weather-${weatherCondition}`}>
 
@@ -242,6 +379,7 @@ function App() {
       <header className="top-header">
 
         <div className="brand">
+
           <span className="brand-icon">
             <Icon name="sun" size={24} />
           </span>
@@ -250,23 +388,67 @@ function App() {
             <h2>Weatherly</h2>
             <p>Weather Dashboard 2.0</p>
           </div>
+
         </div>
 
-        {/* Search */}
-        <form className="search-form" onSubmit={handleSearch}>
+        {/* Search with autocomplete */}
+        <div className="search-container">
 
-          <input
-            type="text"
-            value={city}
-            onChange={(e) => setCity(e.target.value)}
-            placeholder="Search city, PIN code or coordinates..."
-          />
+          <form className="search-form" onSubmit={handleSearch}>
 
-          <button type="submit" disabled={loading}>
-            {loading ? 'Searching...' : 'Search'}
-          </button>
+            <input
+              type="text"
+              value={city}
+              onChange={(e) => setCity(e.target.value)}
+              placeholder="Search city, PIN code or coordinates..."
+              autoComplete="off"
+            />
 
-        </form>
+            <button type="submit" disabled={loading}>
+              {loading ? 'Searching...' : 'Search'}
+            </button>
+
+          </form>
+
+          {(suggestionsLoading || suggestions.length > 0) && (
+
+            <div className="search-suggestions">
+
+              {suggestionsLoading && (
+                <div className="suggestion-message">
+                  Searching cities...
+                </div>
+              )}
+
+              {suggestions.map((suggestion) => (
+                <button
+                  key={`${suggestion.lat}-${suggestion.lon}`}
+                  type="button"
+                  className="suggestion-item"
+                  onClick={() => handleSelectSuggestion(suggestion)}
+                >
+
+                  <span className="suggestion-city">
+                    {suggestion.name}
+                  </span>
+
+                  <span className="suggestion-location">
+                    {suggestion.state
+                      ? `${suggestion.state}, `
+                      : ''}
+                    {suggestion.country === 'IN'
+                      ? 'India'
+                      : suggestion.country}
+                  </span>
+
+                </button>
+              ))}
+
+            </div>
+
+          )}
+
+        </div>
 
       </header>
 

@@ -2195,3 +2195,79 @@ select {
   }
 }
 
+
+/* =========================================
+   CITY SEARCH AUTOCOMPLETE
+========================================= */
+
+.search-container {
+  position: relative;
+  width: min(380px, 100%);
+  z-index: 100;
+}
+
+.search-container .search-form {
+  width: 100%;
+}
+
+.search-suggestions {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  right: 0;
+
+  max-height: 300px;
+  overflow-y: auto;
+
+  background: rgba(20, 30, 50, 0.96);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 12px;
+
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
+
+  padding: 5px;
+  z-index: 1000;
+}
+
+.suggestion-item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+
+  width: 100%;
+  padding: 12px 14px;
+
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+
+  color: #ffffff;
+  text-align: left;
+  cursor: pointer;
+
+  transition: background 0.2s ease;
+}
+
+.suggestion-item:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.suggestion-city {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.suggestion-location {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.65);
+}
+
+.suggestion-message {
+  padding: 12px 14px;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 13px;
+}
