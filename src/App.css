@@ -2271,3 +2271,111 @@ select {
   color: rgba(255, 255, 255, 0.7);
   font-size: 13px;
 }
+
+
+/* =========================================
+   MOBILE SEARCH + AUTOCOMPLETE FIX
+========================================= */
+
+@media (max-width: 650px) {
+
+  /* Header should fit the mobile screen */
+  .dashboard > .top-header {
+    width: calc(100% - 28px);
+    max-width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 14px;
+    padding: 14px;
+    overflow: visible;
+  }
+
+  /* Search container must use the available width */
+  .search-container {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+  }
+
+  /* Search form must stay inside its container */
+  .search-container .search-form {
+    display: flex;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    gap: 4px;
+  }
+
+  /* Input should shrink instead of pushing buttons outside */
+  .search-container .search-form input {
+    flex: 1;
+    width: 0;
+    min-width: 0;
+    padding: 9px 8px;
+    font-size: 13px;
+  }
+
+  /* Keep buttons inside the search form */
+  .search-container .search-form button {
+    flex-shrink: 0;
+    padding: 9px 12px;
+    white-space: nowrap;
+  }
+
+  .search-container .search-form .location-button {
+    flex-shrink: 0;
+    width: 36px;
+    height: 36px;
+  }
+
+  /* Suggestions dropdown must match the search width */
+  .search-suggestions {
+    left: 0;
+    right: 0;
+    width: 100%;
+    max-width: 100%;
+    max-height: min(280px, 45vh);
+    box-sizing: border-box;
+    overflow-y: auto;
+    z-index: 1000;
+  }
+
+  .suggestion-item {
+    width: 100%;
+    min-width: 0;
+    padding: 11px 12px;
+  }
+
+  .suggestion-city,
+  .suggestion-location {
+    max-width: 100%;
+    overflow-wrap: anywhere;
+  }
+}
+
+/* Extra-small mobile screens */
+@media (max-width: 360px) {
+
+  .dashboard > .top-header {
+    padding: 12px;
+  }
+
+  .search-container .search-form {
+    gap: 3px;
+  }
+
+  .search-container .search-form input {
+    padding: 8px 5px;
+    font-size: 12px;
+  }
+
+  .search-container .search-form button {
+    padding: 8px 9px;
+    font-size: 12px;
+  }
+
+  .search-container .search-form .location-button {
+    width: 32px;
+    height: 34px;
+  }
+}
