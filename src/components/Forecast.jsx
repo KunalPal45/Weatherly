@@ -1,4 +1,3 @@
-
 function Forecast({ forecast }) {
   if (!forecast || !forecast.list) return null
 
@@ -30,6 +29,8 @@ function Forecast({ forecast }) {
   ).slice(0, 5)
 
   return (
+    <div className="forecast-section">
+    <h3 className="panel-title">5-DAY FORECAST</h3>
     <div className="forecast-list">
       {dailyForecast.map((day, index) => {
         const date = new Date(
@@ -60,26 +61,31 @@ function Forecast({ forecast }) {
               alt={day.weather[0].description}
             />
 
-            <span className="forecast-description">
-              {day.weather[0].description}
-            </span>
+            <div className="forecast-info">
+              <span className="forecast-description">
+                {day.weather[0].description}
+              </span>
 
-            <strong className="forecast-temp">
-              {Math.round(day.main.temp)}°
-            </strong>
+              <span className="forecast-rain">
+                Rain {day.pop != null
+                  ? Math.round(day.pop * 100)
+                  : 0}%
+              </span>
+            </div>
 
-            <span className="forecast-range">
-              {Math.round(day.main.temp_min)}° / {Math.round(day.main.temp_max)}°
-            </span>
+            <div className="forecast-temps">
+              <strong className="forecast-temp">
+                {Math.round(day.main.temp)}°
+              </strong>
 
-            <span className="forecast-rain">
-              💧 {day.pop != null
-                ? Math.round(day.pop * 100)
-                : 0}%
-            </span>
+              <span className="forecast-range">
+                {Math.round(day.main.temp_min)}° / {Math.round(day.main.temp_max)}°
+              </span>
+            </div>
           </div>
         )
       })}
+    </div>
     </div>
   )
 }

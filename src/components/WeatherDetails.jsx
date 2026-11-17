@@ -1,3 +1,5 @@
+import Icon from './Icon'
+
 
 function WeatherDetails({ weather }) {
   if (!weather) return null
@@ -23,47 +25,47 @@ function WeatherDetails({ weather }) {
 
   const details = [
     {
-      icon: '💧',
+      icon: 'droplet',
       label: 'Humidity',
       value: `${weather.main.humidity}%`
     },
     {
-      icon: '🌬️',
+      icon: 'wind',
       label: 'Wind speed',
       value: `${windSpeed} km/h`
     },
     {
-      icon: '🧭',
+      icon: 'compass',
       label: 'Wind direction',
       value: getWindDirection(weather.wind.deg || 0)
     },
     {
-      icon: '🌥️',
+      icon: 'cloud',
       label: 'Cloud cover',
       value: `${weather.clouds.all}%`
     },
     {
-      icon: '🔵',
+      icon: 'gauge',
       label: 'Pressure',
       value: `${weather.main.pressure} hPa`
     },
     {
-      icon: '👁️',
+      icon: 'eye',
       label: 'Visibility',
       value: `${(weather.visibility / 1000).toFixed(1)} km`
     },
     {
-      icon: '🌡️',
+      icon: 'thermometer',
       label: 'Feels like',
       value: `${Math.round(weather.main.feels_like)}°C`
     },
     {
-      icon: '🌅',
+      icon: 'sunrise',
       label: 'Sunrise',
       value: formatTime(weather.sys.sunrise)
     },
     {
-      icon: '🌇',
+      icon: 'sunset',
       label: 'Sunset',
       value: formatTime(weather.sys.sunset)
     }
@@ -80,7 +82,7 @@ function WeatherDetails({ weather }) {
         {details.map((item) => (
           <div className="detail-item" key={item.label}>
             <span className="detail-icon">
-              {item.icon}
+              <Icon name={item.icon} />
             </span>
 
             <div>

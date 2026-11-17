@@ -1,4 +1,3 @@
-
 import { useEffect } from 'react'
 
 import {
@@ -54,8 +53,9 @@ function WeatherMap({ weather }) {
     typeof longitude !== 'number'
   ) {
     return (
-      <div className="map-card">
-        <p>Location coordinates are not available.</p>
+      <div className="map-section">
+        <h3 className="panel-title">LIVE MAP</h3>
+        <p className="map-location">Location coordinates are not available.</p>
       </div>
     )
   }
@@ -63,7 +63,10 @@ function WeatherMap({ weather }) {
   const center = [latitude, longitude]
 
   return (
-    <div className="map-card">
+    <div className="map-section">
+      <h3 className="panel-title">LIVE MAP</h3>
+
+      <div className="map-card">
 
       <MapContainer
         center={center}
@@ -96,6 +99,8 @@ function WeatherMap({ weather }) {
         </Marker>
 
       </MapContainer>
+
+      </div>
 
       <div className="map-location">
         <strong>{weather.name}</strong>

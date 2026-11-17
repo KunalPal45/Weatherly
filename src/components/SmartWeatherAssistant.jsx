@@ -1,3 +1,5 @@
+import Icon from './Icon'
+
 
 function SmartWeatherAssistant({ weather, forecast }) {
   if (!weather) return null
@@ -48,12 +50,12 @@ function SmartWeatherAssistant({ weather, forecast }) {
 
   // 2. Umbrella recommendation
   let umbrellaAdvice = ''
-  let umbrellaIcon = '☀️'
+  let umbrellaIcon = 'sun'
 
   if (hasRain || rainProbability >= 0.4) {
     umbrellaAdvice =
       'Rain may occur soon. Carry an umbrella before going outside.'
-    umbrellaIcon = '☂️'
+    umbrellaIcon = 'umbrella'
   } else {
     umbrellaAdvice =
       'Rain chances look low in the upcoming forecast. An umbrella may not be necessary.'
@@ -122,7 +124,7 @@ function SmartWeatherAssistant({ weather, forecast }) {
       {/* Assistant heading */}
       <div className="assistant-header">
         <div className="assistant-title">
-          <div className="assistant-icon">✦</div>
+          <div className="assistant-icon"><Icon name="sparkle" size={24} /></div>
 
           <div>
             <h2>Weatherly Intelligence</h2>
@@ -165,7 +167,7 @@ function SmartWeatherAssistant({ weather, forecast }) {
 
         <article className="assistant-card clothing-card">
           <div className="assistant-card-top">
-            <div className="assistant-card-icon">👕</div>
+            <div className="assistant-card-icon"><Icon name="shirt" /></div>
             <span className="assistant-card-number">01</span>
           </div>
 
@@ -180,7 +182,7 @@ function SmartWeatherAssistant({ weather, forecast }) {
         <article className="assistant-card umbrella-card">
           <div className="assistant-card-top">
             <div className="assistant-card-icon">
-              {umbrellaIcon}
+              <Icon name={umbrellaIcon} />
             </div>
             <span className="assistant-card-number">02</span>
           </div>
@@ -202,7 +204,7 @@ function SmartWeatherAssistant({ weather, forecast }) {
 
         <article className="assistant-card activity-card">
           <div className="assistant-card-top">
-            <div className="assistant-card-icon">🏃</div>
+            <div className="assistant-card-icon"><Icon name="activity" /></div>
             <span className="assistant-card-number">03</span>
           </div>
 
@@ -216,7 +218,7 @@ function SmartWeatherAssistant({ weather, forecast }) {
 
         <article className="assistant-card hydration-card">
           <div className="assistant-card-top">
-            <div className="assistant-card-icon">💧</div>
+            <div className="assistant-card-icon"><Icon name="droplet" /></div>
             <span className="assistant-card-number">04</span>
           </div>
 
@@ -232,7 +234,7 @@ function SmartWeatherAssistant({ weather, forecast }) {
 
       {/* Smart tip */}
       <div className="assistant-tip">
-        <span className="tip-icon">💡</span>
+        <span className="tip-icon"><Icon name="bulb" size={22} /></span>
 
         <div>
           <h3>Smart tip of the day</h3>

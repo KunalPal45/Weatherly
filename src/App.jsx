@@ -1,5 +1,5 @@
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 import {
   getCurrentWeather,
@@ -15,11 +15,12 @@ import WeatherDetails from './components/WeatherDetails'
 import WeatherEffects from './components/WeatherEffects'
 import SmartWeatherAssistant from './components/SmartWeatherAssistant'
 import SolarTimeline from './components/SolarTimeline'
+import Icon from './components/Icon'
 
 import './App.css'
 
 function App() {
-  const [city, setCity] = useState('Mumbai')
+  const [city, setCity] = useState('')
   const [weather, setWeather] = useState(null)
   const [forecast, setForecast] = useState(null)
   const [locationInfo, setLocationInfo] = useState(null)
@@ -139,6 +140,86 @@ function App() {
     }
   }
 
+  // Detect current location and fetch its weather
+  const handleUseCurrentLocation = () => {
+    if (!navigator.geolocation) {
+      setError('Geolocation is not supported by your browser.')
+      return
+    }
+
+    setLoading(true)
+    setError('')
+    setLocationInfo(null)
+
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        try {
+          const latitude = position.coords.latitude
+          const longitude = position.coords.longitude
+
+          const results = await Promise.all([
+            getCurrentWeatherByCoordinates(latitude, longitude),
+            getForecastByCoordinates(latitude, longitude)
+          ])
+
+          const currentWeather = results[0]
+          const weatherForecast = results[1]
+
+          // Update weather without changing the search box
+          setWeather(currentWeather)
+          setForecast(weatherForecast)
+
+        } catch (err) {
+          console.error('Current location weather error:', err)
+
+          if (err.response?.status === 401) {
+            setError('Weather API key is invalid or not activated.')
+          } else if (err.response?.status === 404) {
+            setError(
+              'Weather information could not be found for your location.'
+            )
+          } else {
+            setError(
+              'Could not fetch weather for your current location. Please try again.'
+            )
+          }
+
+        } finally {
+          setLoading(false)
+        }
+      },
+
+      (geoError) => {
+        console.error('Geolocation error:', geoError)
+
+        if (geoError.code === 1) {
+          setError(
+            'Location permission denied. Please allow location access in your browser.'
+          )
+        } else if (geoError.code === 2) {
+          setError('Your current location could not be determined.')
+        } else if (geoError.code === 3) {
+          setError('Location request timed out. Please try again.')
+        } else {
+          setError('Unable to detect your current location.')
+        }
+
+        setLoading(false)
+      },
+
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 300000
+      }
+    )
+  }
+
+  // Automatically detect location when the page opens
+  useEffect(() => {
+    handleUseCurrentLocation()
+  }, [])
+
   // Detect actual weather condition from API
   const weatherCondition =
     weather?.weather?.[0]?.main?.toLowerCase() || 'default'
@@ -161,7 +242,9 @@ function App() {
       <header className="top-header">
 
         <div className="brand">
-          <span className="brand-icon">☀</span>
+          <span className="brand-icon">
+            <Icon name="sun" size={24} />
+          </span>
 
           <div>
             <h2>Weatherly</h2>
@@ -171,11 +254,12 @@ function App() {
 
         {/* Search */}
         <form className="search-form" onSubmit={handleSearch}>
+
           <input
             type="text"
             value={city}
             onChange={(e) => setCity(e.target.value)}
-            placeholder="City, PIN code or lat, lon..."
+            placeholder="Search city, PIN code or coordinates..."
           />
 
           <button type="submit" disabled={loading}>
@@ -270,7 +354,7 @@ function App() {
 
           </section>
 
-          {/* New animated sunlight timeline */}
+          {/* Animated sunlight timeline */}
           <SolarTimeline weather={weather} />
 
           {/* Main dashboard grid */}
@@ -283,11 +367,7 @@ function App() {
           </section>
 
           {/* Weather details */}
-          <section className="details-section">
-
-            <WeatherDetails weather={weather} />
-
-          </section>
+          <WeatherDetails weather={weather} />
 
           {/* Smart Weather Assistant */}
           <SmartWeatherAssistant
@@ -298,7 +378,10 @@ function App() {
           {/* Extended forecast */}
           <section className="extended-section">
 
-            <h2>Weather Overview</h2>
+            <div className="section-heading">
+              <span>SUMMARY</span>
+              <h3>Weather overview</h3>
+            </div>
 
             <p>
               Weather in {weather.name} is currently
@@ -320,7 +403,9 @@ function App() {
 
         <section className="empty-state">
 
-          <div className="empty-icon">🌤️</div>
+          <div className="empty-icon">
+            <Icon name="cloudSun" size={44} />
+          </div>
 
           <h2>Welcome to Weatherly</h2>
 

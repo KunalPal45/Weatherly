@@ -1,3 +1,5 @@
+import Icon from './Icon'
+
 
 import { useEffect, useState } from 'react'
 
@@ -150,7 +152,7 @@ function SolarTimeline({ weather }) {
 
       <div className="solar-times">
         <div>
-        <span className="solar-time-icon sunrise-icon">☀</span>
+        <span className="solar-time-icon sunrise-icon"><Icon name="sunrise" size={22} /></span>
           <div>
             <strong>{sunriseTime}</strong>
             <small>Sunrise</small>
@@ -163,7 +165,7 @@ function SolarTimeline({ weather }) {
         </div>
 
         <div>
-          <span className="solar-time-icon sunset-icon">☀</span>
+          <span className="solar-time-icon sunset-icon"><Icon name="sunset" size={22} /></span>
           <div>
             <strong>{sunsetTime}</strong>
             <small>Sunset</small>
